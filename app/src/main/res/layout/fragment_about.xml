@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/aboutlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/background_light"
+    tools:context=".ui.configmenu.AboutFragment">
+    <!--    android:background="@android:color/background_light"-->
+    <TextView
+        android:id="@+id/schoolname"
+        android:layout_width="153dp"
+        android:layout_height="41dp"
+        android:layout_marginStart="129dp"
+        android:layout_marginTop="108dp"
+        android:layout_marginEnd="129dp"
+        android:text="北京工业大学"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/wechatid"
+        android:layout_width="223dp"
+        android:layout_height="43dp"
+        android:layout_marginStart="129dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="129dp"
+        android:text="微信号：107937286"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/schoolname" />
+</androidx.constraintlayout.widget.ConstraintLayout>
