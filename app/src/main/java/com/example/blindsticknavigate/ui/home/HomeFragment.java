@@ -26,6 +26,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.blindsticknavigate.BleLowEnergy;
 import com.example.blindsticknavigate.Businfo;
+import com.example.blindsticknavigate.Businformation;
+import com.example.blindsticknavigate.GodeLocation;
 import com.example.blindsticknavigate.MainActivity;
 import com.example.blindsticknavigate.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -51,6 +53,14 @@ public class HomeFragment extends Fragment {
     TextView twofunctext=null;
     MainActivity mainact =null;
     Businfo businfo=null;
+    Handler homefraghandler=new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            dealmessage(msg);
+            return false;
+        }
+    });
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -131,46 +141,36 @@ public class HomeFragment extends Fragment {
         busreport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                GodeLocation godeLocation=new GodeLocation((MainActivity)getActivity(),homefraghandler);
+                godeLocation.startlocate();
                 //获取poi兴趣点公交站
                 double lng=((MainActivity)getActivity()).lng;
                 double lat=((MainActivity)getActivity()).lat;
-                businfo=new Businfo(lng,lat);
-                businfo.getpoi();
-                while(businfo.responseBodystring.length()<=0){
-                    continue;
-                }
 
-                String info=businfo.responseBodystring;
-                try {
-                    JSONObject jo = new JSONObject(info);
-                    JSONArray pois=jo.getJSONArray("pois");
-                    JSONObject neareststop=(JSONObject) pois.get(0);
-                    String stopname=neareststop.getString("name");
-                    String lines=neareststop.getString("address");
+                Businformation bus=new Businformation(lng,lat,homefraghandler);
+//                String getpois=bus.getpoi();
+//                String[] linename=getpois.split("&")[0].split(";");
+//
+//                String[] lineids=bus.getrealtimebusline(getpois);
+//                String[] condition=bus.getrealtimestopid(lineids);
+//                String[] cominginfos=bus.getbuscominginfo(condition);
+//                String readword="";
+//                for(int i=0;i<linename.length;i++){
+//                    if(cominginfos[i].contains("&")){
+//                        readword+=linename[i]+"距您"+cominginfos[i].split("&")[0]+"米"+"还有"+cominginfos[i].split("&")[1]+"站  ";
+//
+//                    }else{
+//                        readword+=linename[i]+"暂无信息  ";
+//                    }
+//                }
+//                ((MainActivity)getActivity()).audio.speak(readword);
 
-                    //根据线路获取线路id
-                    HashMap<String,String> kv= businfo.getstopnameandline(lines,stopname);
-                    businfo.getrealtimebusline(kv);
-                    while(businfo.lineid.size()<kv.size()){
-                        continue;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        bus.reportword();
                     }
-
-                    businfo.getrealtimestopid(businfo.lineid,kv);
-                    while(businfo.stopids.size()<kv.size()){
-                        continue;
-                    }
-
-                    businfo.getrealbuscominginfo();
-                    while(businfo.cominginfos.size()<kv.size()){
-                        continue;
-                    }
-
-                    Log.i("sign","!!");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-//                Log.i("Home response info",info);
+                }).start();
             }
         });
 
@@ -229,5 +229,17 @@ public class HomeFragment extends Fragment {
     public void setbackcolor(int color){
         lyout.setBackgroundColor(getResources().getColor(color));
         navibarlyout.setBackgroundColor(getResources().getColor(color));
+    }
+
+    private void dealmessage(Message msg){
+        switch (msg.what){
+            case 1:
+                ((MainActivity)getActivity()).audio.speak((String)msg.obj);
+                break;
+            case 2:
+                ((MainActivity)getActivity()).lng=Double.parseDouble(((String)msg.obj).split("&")[0]);
+                ((MainActivity)getActivity()).lat=Double.parseDouble(((String)msg.obj).split("&")[1]);
+                break;
+        }
     }
 }
