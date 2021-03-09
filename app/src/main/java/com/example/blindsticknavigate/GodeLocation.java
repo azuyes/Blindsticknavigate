@@ -34,6 +34,7 @@ public class GodeLocation {
                     //可在其中解析amapLocation获取相应内容。
                         Double lat=aMapLocation.getLatitude();//获取纬度
                         Double lng=aMapLocation.getLongitude();//获取经度
+                        Log.i("Gode location get:","lat:"+String.valueOf(lat)+"lng"+String.valueOf(lng));
                         Message msg=Message.obtain();
                         msg.what=2;
                         msg.obj=String.valueOf(lng)+"&"+String.valueOf(lat);

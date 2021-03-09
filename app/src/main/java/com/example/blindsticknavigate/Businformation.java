@@ -323,26 +323,33 @@ public class Businformation {
     }
 
     public String reportword(){
-        String getpois=this.getpoi();
-        String[] linename=getpois.split("&")[0].split(";");
+        String readword = "";
+        try {
+            String getpois = this.getpoi();
+            String[] linename = getpois.split("&")[0].split(";");
+            String stopname = getpois.split("&")[1];
+            String[] lineids = this.getrealtimebusline(getpois);
+            String[] condition = this.getrealtimestopid(lineids);
+            String[] cominginfos = this.getbuscominginfo(condition);
+            readword = "您现在位于" + stopname + " ";
+            for (int i = 0; i < linename.length; i++) {
+                if (cominginfos[i].contains("&")) {
+                    readword += linename[i] + "距您" + cominginfos[i].split("&")[0] + "米" + "还有" + cominginfos[i].split("&")[1] + "站  ";
 
-        String[] lineids=this.getrealtimebusline(getpois);
-        String[] condition=this.getrealtimestopid(lineids);
-        String[] cominginfos=this.getbuscominginfo(condition);
-        String readword="";
-        for(int i=0;i<linename.length;i++){
-            if(cominginfos[i].contains("&")){
-                readword+=linename[i]+"距您"+cominginfos[i].split("&")[0]+"米"+"还有"+cominginfos[i].split("&")[1]+"站  ";
-
-            }else{
-                readword+=linename[i]+"暂无信息  ";
+                } else {
+                    readword += linename[i] + "暂无信息  ";
+                }
             }
+        }catch(Exception e){
+            e.printStackTrace();
+            readword="查询出错";
+        }finally {
+            Message msg = Message.obtain();
+            msg.what = 1;
+            msg.obj = readword;
+            handler.sendMessage(msg);
+            return readword;
         }
-        Message msg=Message.obtain();
-        msg.what=1;
-        msg.obj=readword;
-        handler.sendMessage(msg);
-        return readword;
     }
 
 }
