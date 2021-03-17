@@ -28,6 +28,7 @@ import com.example.blindsticknavigate.BleLowEnergy;
 import com.example.blindsticknavigate.Businfo;
 import com.example.blindsticknavigate.MainActivity;
 import com.example.blindsticknavigate.R;
+import com.example.blindsticknavigate.Surroundings;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
@@ -45,6 +46,8 @@ public class HomeFragment extends Fragment {
     Button redgreenlight=null;
     Button audioreport=null;
     Button busreport=null;
+    // “周围商铺”按钮
+    Button surroundings = null;
     ConstraintLayout lyout=null;
     BottomNavigationView navibarlyout=null;
     TextView textView=null;
@@ -70,7 +73,8 @@ public class HomeFragment extends Fragment {
         obstacledetect=(Button) root.findViewById(R.id.obstacledetect);
         audioreport=(Button) root.findViewById(R.id.audioreport);
         busreport=(Button) root.findViewById(R.id.busreport);
-
+        // 获取“周围商铺”按钮
+        surroundings = (Button)root.findViewById(R.id.surroundings);
 
         init();
 
@@ -172,6 +176,16 @@ public class HomeFragment extends Fragment {
                 }
 //                Log.i("Home response info",info);
             }
+        });
+
+        surroundings.setOnClickListener(v -> {
+            // 当前位置经纬度
+            double lng=((MainActivity)getActivity()).lng;
+            double lat=((MainActivity)getActivity()).lat;
+            Surroundings tool = new Surroundings();
+            tool.setLat(String.valueOf(lat));
+            tool.setLng(String.valueOf(lng));
+
         });
 
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
