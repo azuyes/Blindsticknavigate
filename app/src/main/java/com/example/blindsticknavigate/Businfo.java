@@ -28,9 +28,9 @@ public class Businfo{
     String poiurl=null;
     String realtimebuslineurl="http://www.bjbus.com/api/api_etaline_list.php?hidden_MapTool=busex2.BusInfo&city=%u5317%u4EAC&pageindex=1&pagesize=30&fromuser=bjbus&datasource=bjbus&clientid=9db0f8fcb62eb46c&webapp=mobilewebapp&what=";
     public String responseBodystring="";
-    public List<String> lineid=new ArrayList<String>();
+    public List<String> lineid=null;
     public List<String> anotherdirectionlineid=new ArrayList<String>();
-    public List<String> stopids=new ArrayList<String>();
+    public List<String> stopids=null;
     public List<String> cominginfos=new ArrayList<String>();
 
     public Businfo(Double lng,Double lat){
@@ -82,7 +82,11 @@ public class Businfo{
     }
 
     public void getrealtimebusline(HashMap<String,String> kv){
+        lineid=new ArrayList<String>();
+        int position=0;
         for(Map.Entry<String,String> entry:kv.entrySet()){
+            int pos=position;
+            position++;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -113,7 +117,7 @@ public class Businfo{
                                 JSONObject onedirection=(JSONObject) feature.get(0);
                                 JSONObject anotherdirection=(JSONObject) feature.get(1);
                                 anotherdirectionlineid.add(anotherdirection.getString("lineId"));
-                                lineid.add(onedirection.getString("lineId"));
+                                lineid.set(pos,onedirection.getString("lineId"));
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -130,11 +134,15 @@ public class Businfo{
     }
 
     public void getrealtimestopid(List<String> lineid,HashMap<String,String> kv) {
+        stopids=new ArrayList<String>();
+        int position=0;
         List<String> stopnames=new ArrayList<String>();
         for(Map.Entry<String,String> entry:kv.entrySet()){
             stopnames.add(entry.getValue().replace("(公交站)",""));
         }
         for(String line : lineid) {
+            int pos=position;
+            position++;
             String stopsurl = "http://www.bjbus.com/api/api_etastation.php?lineId=" + line + "&token=eyJhbGciOiJIUzI1NiIsIlR5cGUiOiJKd3QiLCJ0eXAiOiJKV1QifQ.eyJwYXNzd29yZCI6IjY0ODU5MTQzNSIsInVzZXJOYW1lIjoiYmpidXMiLCJleHAiOjE2MTY1MzY4MDF9.BalA1LZoStafkHzomepuv51bUDdiQY8Q6JiB_l8vIW8";
             new Thread(new Runnable() {
                 @Override
@@ -163,12 +171,9 @@ public class Businfo{
                                     for (int j = 0; j < stops.length(); j++) {
                                         JSONObject stop = (JSONObject) stops.get(j);
                                         if (stop.get("stopName").equals(stopname)){
-                                            stopids.add(stop.getString("stationId"));
+                                            stopids.set(pos,stop.getString("stationId"));
                                         }
                                     }
-                                }
-                                if(stopids.size()==0){
-
                                 }
 
 
@@ -190,12 +195,12 @@ public class Businfo{
             conditions.add(lineid.get(i)+"-"+stopids.get(i));
         }
         for(String condition : conditions) {
+//            http://www.bjbus.com/home/fun_rtbus.php?uSec=00000160&uSub=00000162
             String condurl = "http://www.bjbus.com/api/api_etartime.php?conditionstr=" + condition + "&token=eyJhbGciOiJIUzI1NiIsIlR5cGUiOiJKd3QiLCJ0eXAiOiJKV1QifQ.eyJwYXNzd29yZCI6IjY0ODU5MTQzNSIsInVzZXJOYW1lIjoiYmpidXMiLCJleHAiOjE2MTY1MzY4MDF9.BalA1LZoStafkHzomepuv51bUDdiQY8Q6JiB_l8vIW8";
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        
                         //创建OkHttpClient对象
                         OkHttpClient client = new OkHttpClient();
                         //创建Request
@@ -235,6 +240,12 @@ public class Businfo{
         }
 
     }
+
+
+
+//    private void addwithorder(ArrayList<String> list,String ele,int pos){
+//        if(pos+1>list.size()) list.
+//    }
 
 
 }

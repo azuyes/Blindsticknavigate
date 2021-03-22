@@ -56,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
         }
     });
 
+    private final Handler locationhandler = new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            locationchange(msg);
+            return false;
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,35 +83,37 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setTitle("盲杖应用");
 
         audio = new Audio(this);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            Location l = locationManager.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
-        }
-
-//        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        //获取经度
-        lng = bestLocation.getLongitude();
-        //获取纬度
-        lat = bestLocation.getLatitude();
+        GodeLocation godeLocation=new GodeLocation(this,locationhandler);
+        godeLocation.startlocate();
+//        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        List<String> providers = locationManager.getProviders(true);
+//        Location bestLocation = null;
+//        for (String provider : providers) {
+//            Location l = locationManager.getLastKnownLocation(provider);
+//            if (l == null) {
+//                continue;
+//            }
+//            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+//                // Found best last known location: %s", l);
+//                bestLocation = l;
+//            }
+//        }
+//
+////        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//        //获取经度
+//        lng = bestLocation.getLongitude();
+//        //获取纬度
+//        lat = bestLocation.getLatitude();
     }
 
 //    @Override
@@ -207,6 +218,16 @@ public class MainActivity extends AppCompatActivity {
             case profile.REDGRENNLIGHT:
                 hfra.setbackcolor(R.color.redgreenlight);
                 audio.speak("开启红绿灯检测");
+                break;
+
+        }
+    }
+
+    public void locationchange(Message msg){
+        switch (msg.what){
+            case 2:
+                this.lng=Double.parseDouble(((String)msg.obj).split("&")[0]);
+                this.lat=Double.parseDouble(((String)msg.obj).split("&")[1]);
                 break;
         }
     }
