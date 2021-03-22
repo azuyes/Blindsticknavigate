@@ -30,6 +30,7 @@ import com.example.blindsticknavigate.Businformation;
 import com.example.blindsticknavigate.GodeLocation;
 import com.example.blindsticknavigate.MainActivity;
 import com.example.blindsticknavigate.R;
+import com.example.blindsticknavigate.Surroundings;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
@@ -47,12 +48,16 @@ public class HomeFragment extends Fragment {
     Button redgreenlight=null;
     Button audioreport=null;
     Button busreport=null;
+    // “周围商铺”按钮
+    Button surroundings = null;
     ConstraintLayout lyout=null;
     BottomNavigationView navibarlyout=null;
     TextView textView=null;
     TextView twofunctext=null;
     MainActivity mainact =null;
     Businfo businfo=null;
+    Surroundings sur_tool;
+
     Handler homefraghandler=new Handler(new Handler.Callback() {
 
         @Override
@@ -61,6 +66,7 @@ public class HomeFragment extends Fragment {
             return false;
         }
     });
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -80,7 +86,8 @@ public class HomeFragment extends Fragment {
         obstacledetect=(Button) root.findViewById(R.id.obstacledetect);
         audioreport=(Button) root.findViewById(R.id.audioreport);
         busreport=(Button) root.findViewById(R.id.busreport);
-
+        // 获取“周围商铺”按钮
+        surroundings = (Button)root.findViewById(R.id.surroundings);
 
         init();
 
@@ -174,6 +181,16 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        surroundings.setOnClickListener(v -> {
+            // 获取并当前位置经纬度
+            double lng=((MainActivity)getActivity()).lng;
+            double lat=((MainActivity)getActivity()).lat;
+            sur_tool.setLat(String.valueOf(lat));
+            sur_tool.setLng(String.valueOf(lng));
+            // 获取前方三角形范围内的poi
+            sur_tool.getSurroundingPois();
+        });
+
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
 //            @Override
 //            public void onChanged(@Nullable String s) {
@@ -225,6 +242,11 @@ public class HomeFragment extends Fragment {
             audioreport.setVisibility(View.INVISIBLE);
         }
         setbackcolor(R.color.white);
+
+        // 初始化"周围商铺"功能中用到的context和传感器监听
+        sur_tool = new Surroundings();
+        sur_tool.setMcontext(getContext());
+        sur_tool.setmSensorHelper();
     }
     public void setbackcolor(int color){
         lyout.setBackgroundColor(getResources().getColor(color));
