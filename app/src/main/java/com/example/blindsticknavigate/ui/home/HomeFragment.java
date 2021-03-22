@@ -54,6 +54,7 @@ public class HomeFragment extends Fragment {
     TextView twofunctext=null;
     MainActivity mainact =null;
     Businfo businfo=null;
+    Surroundings sur_tool;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -179,13 +180,13 @@ public class HomeFragment extends Fragment {
         });
 
         surroundings.setOnClickListener(v -> {
-            // 当前位置经纬度
+            // 获取并当前位置经纬度
             double lng=((MainActivity)getActivity()).lng;
             double lat=((MainActivity)getActivity()).lat;
-            Surroundings tool = new Surroundings();
-            tool.setLat(String.valueOf(lat));
-            tool.setLng(String.valueOf(lng));
-
+            sur_tool.setLat(String.valueOf(lat));
+            sur_tool.setLng(String.valueOf(lng));
+            // 获取前方三角形范围内的poi
+            sur_tool.getSurroundingPois();
         });
 
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -239,6 +240,11 @@ public class HomeFragment extends Fragment {
             audioreport.setVisibility(View.INVISIBLE);
         }
         setbackcolor(R.color.white);
+
+        // 初始化"周围商铺"功能中用到的context和传感器监听
+        sur_tool = new Surroundings();
+        sur_tool.setMcontext(getContext());
+        sur_tool.setmSensorHelper();
     }
     public void setbackcolor(int color){
         lyout.setBackgroundColor(getResources().getColor(color));
