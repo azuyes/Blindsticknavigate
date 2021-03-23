@@ -182,13 +182,19 @@ public class HomeFragment extends Fragment {
         });
 
         surroundings.setOnClickListener(v -> {
-            // 获取并当前位置经纬度
-            double lng=((MainActivity)getActivity()).lng;
-            double lat=((MainActivity)getActivity()).lat;
-            sur_tool.setLat(String.valueOf(lat));
-            sur_tool.setLng(String.valueOf(lng));
-            // 获取前方三角形范围内的poi
-            sur_tool.getSurroundingPois();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // 获取并当前位置经纬度
+                    double lng=((MainActivity)getActivity()).lng;
+                    double lat=((MainActivity)getActivity()).lat;
+                    sur_tool.setLat(String.valueOf(lat));
+                    sur_tool.setLng(String.valueOf(lng));
+                    sur_tool.setHandler(homefraghandler);
+                    // 获取前方三角形范围内的poi
+                    sur_tool.getSurroundingPois();
+                }
+            }).start();
         });
 
 //        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {

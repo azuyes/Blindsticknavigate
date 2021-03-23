@@ -1,6 +1,7 @@
 package com.example.blindsticknavigate;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -19,55 +20,59 @@ public class POIRequest {
     private String coordinates;
     private String extensions = "base";
     private String output = "JSON";
-
     private String responseBodyString = "";
+    private GetPolygonPois getPolygonPois;
+
+    public class GetPolygonPois implements Callable<String> {
+        @Override
+        public String call() throws Exception {
+            String poi_url = "https://restapi.amap.com/v3/place/polygon?" +
+                    "key=" + key +
+                    "&polygon=" + getCoordinates() +
+//                    "&keywords=" + keywords +
+                    "&types=" + types +
+                    "&extensions=" + extensions +
+                    "&output=" + output;
+            return send_request(poi_url);
+        }
+    }
+
     /**
      * 创建多边形搜索poi_url
      * @return
      */
     public String polygon_search(){
-        StringBuilder poi_url = new StringBuilder();
-        poi_url.append("https://restapi.amap.com/v3/place/polygon?");
-        poi_url.append("key=").append(this.key);
-        poi_url.append("&polygon=").append(this.getCoordinates());
-        poi_url.append("&keywords=").append(this.keywords);
-        poi_url.append("&types=").append(this.types);
-        poi_url.append("&extensions=").append(this.extensions);
-        poi_url.append("&output=").append(this.output);
+        String poi_url = "https://restapi.amap.com/v3/place/polygon?" +
+                "key=" + this.key +
+                "&polygon=" + this.getCoordinates() +
+                "&keywords=" + this.keywords +
+                "&types=" + this.types +
+                "&extensions=" + this.extensions +
+                "&output=" + this.output;
 
-        String responseBodyString = send_request(poi_url.toString());
-        return responseBodyString;
+        return send_request(poi_url);
     }
 
-    public synchronized String send_request(String poi_url){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    //创建OkHttpClient对象
-                    OkHttpClient client = new OkHttpClient();
-                    //创建Request
-                    Request request = new Request.Builder()
-                            .url(poi_url)//访问连接
-                            .get()
-                            .build();
-                    //创建Call对象
-                    Call call = client.newCall(request);
-                    //通过execute()方法获得请求响应的Response对象
-                    Response response = call.execute();
-                    if (response.isSuccessful()) {
-                        ResponseBody responseBody=response.body();
-                        responseBodyString=responseBody.string();
-                        System.out.println("Surroundings response info: "+responseBodyString);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    public String send_request(String poi_url){
+        try {
+            //创建OkHttpClient对象
+            OkHttpClient client = new OkHttpClient();
+            //创建Request
+            Request request = new Request.Builder()
+                    .url(poi_url)//访问连接
+                    .get()
+                    .build();
+            //创建Call对象
+            Call call = client.newCall(request);
+            //通过execute()方法获得请求响应的Response对象
+            Response response = call.execute();
+            if (response.isSuccessful()) {
+                ResponseBody responseBody=response.body();
+                responseBodyString=responseBody.string();
+                System.out.println("Surroundings response info: "+responseBodyString);
             }
-        }).start();
-
-        while(responseBodyString.length()<=0){
-            continue;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return responseBodyString;
@@ -128,5 +133,13 @@ public class POIRequest {
 
     public void setCoordinates(String coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public GetPolygonPois getGetPolygonPois() {
+        return getPolygonPois;
+    }
+
+    public void setGetPolygonPois() {
+        this.getPolygonPois = new GetPolygonPois();
     }
 }

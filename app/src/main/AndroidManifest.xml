@@ -31,7 +31,7 @@
         android:theme="@style/Theme.Blindsticknavigate"
         android:usesCleartextTraffic="true">
 
-        <meta-data android:name="com.amap.api.v2.apikey" android:value="4c083cd7d72f282e5c21dced9c9aa921"/>
+        <meta-data android:name="com.amap.api.v2.apikey" android:value="42f2007f4eab726219b25c6b937c5b83"/>
         <service android:name="com.amap.api.location.APSService"/>
         <activity
             android:name=".MainActivity"
