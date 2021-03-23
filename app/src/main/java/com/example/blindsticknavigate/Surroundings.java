@@ -1,6 +1,8 @@
 package com.example.blindsticknavigate;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.example.blindsticknavigate.ui.surroundings.SensorEventHelper;
@@ -10,6 +12,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class Surroundings {
 
@@ -17,6 +23,8 @@ public class Surroundings {
     private String lat;
     private Context mcontext;
     private SensorEventHelper mSensorHelper;
+    private final int edge = 2000;
+    private Handler handler;
 
     public SensorEventHelper getmSensorHelper() {
         return mSensorHelper;
@@ -25,20 +33,48 @@ public class Surroundings {
     public void getSurroundingPois(){
         float mAngle = mSensorHelper.getmAngle();
         String coordinates = cal_lat_lng(Double.valueOf(lat), Double.valueOf(lng), mAngle);
+        StringBuilder sb = new StringBuilder();
+        sb.append("前方").append(edge).append("米范围内：");
 
+        // 发送poi请求
         POIRequest request = new POIRequest();
         request.setKey(profile.gaodeKey);
         request.setCoordinates(coordinates);
-
-        String responseBodyString = request.polygon_search();
+        request.setTypes("050301");
+        request.setGetPolygonPois();
+        FutureTask<String> polygon=new FutureTask<>(request.getGetPolygonPois());
+        new Thread(polygon).start();
+        String responseBodyString = "";
+        try {
+            responseBodyString = polygon.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         try {
             JSONObject jo = new JSONObject(responseBodyString);
             JSONArray pois=jo.getJSONArray("pois");
-
-
+            if(pois.length() == 0)
+                sb.append("没有店铺");
+            else {
+                sb.append("有").append(pois.length()).append("家店铺。");
+                for (int i = 0; i < pois.length(); i++) {
+                    JSONObject poi = (JSONObject) pois.get(i);
+                    sb.append(poi.getString("name"));
+//                            .append("距离").append(poi.getString("distance")).append("米。");
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
+            sb.delete(0, sb.length());
+            sb.append("查询出错");
+        }finally {
+            Message msg = Message.obtain();
+            msg.what = 1;
+            msg.obj = sb.toString();
+            handler.sendMessage(msg);
         }
     }
 
@@ -52,7 +88,6 @@ public class Surroundings {
      */
     public String cal_lat_lng(Double cur_lat, Double cur_lng, float mAngle){
         StringBuilder coordinates = new StringBuilder();
-        int edge = 30;
 
         double pi = Math.PI;
         double r_earth = 6378000;
@@ -107,5 +142,11 @@ public class Surroundings {
         this.lat = lat;
     }
 
+    public Handler getHandler() {
+        return handler;
+    }
 
+    public void setHandler(Handler handler) {
+        this.handler = handler;
+    }
 }
